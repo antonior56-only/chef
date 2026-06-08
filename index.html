@@ -92,6 +92,15 @@
                 <input type="text" id="dish-input" placeholder="es. Carbonara, Tiramisù..." class="main-input" autocomplete="off">
                 <button class="btn btn-terra" id="search-name-btn" onclick="handleSearch('name')">Cerca ✨</button>
             </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:14px; justify-content:flex-end;">
+                <label style="font-size:0.85rem; color:var(--muted);">Numero di ricette:</label>
+                <select id="recipe-count-select" onchange="recipeCount=parseInt(this.value)" style="padding:5px 10px; border-radius:8px; border:1.5px solid var(--brown); background:var(--cream); color:var(--brown); font-size:0.9rem; cursor:pointer;">
+                    <option value="3" selected>3</option>
+                    <option value="5">5</option>
+                    <option value="8">8</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
         </div>
 
         <!-- Sezione Ingredienti -->
@@ -104,6 +113,15 @@
             </div>
             <div class="tags-container" id="tags-wrapper">
                 <span style="color: var(--muted); font-style: italic; font-size: 14px; align-self: center;">Nessun ingrediente ancora…</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; justify-content:flex-end;">
+                <label style="font-size:0.85rem; color:var(--muted);">Numero di ricette:</label>
+                <select id="recipe-count-select-ing" onchange="recipeCount=parseInt(this.value)" style="padding:5px 10px; border-radius:8px; border:1.5px solid var(--brown); background:var(--cream); color:var(--brown); font-size:0.9rem; cursor:pointer;">
+                    <option value="3" selected>3</option>
+                    <option value="5">5</option>
+                    <option value="8">8</option>
+                    <option value="10">10</option>
+                </select>
             </div>
             <button class="btn btn-terra" style="width: 100%;" id="search-ing-btn" onclick="handleSearch('ing')" disabled>🍳 Trovami delle ricette!</button>
         </div>
@@ -140,12 +158,13 @@
 
     <script>
         // Formattazione stringa sicura
-        const SYSTEM_PROMPT = 'Sei Il Mio Chef. Rispondi SOLO con JSON valido, nessun testo extra, nessun markdown.\\n' +
-            'Formato esatto:\\n' +
-            '{"recipes":[{"name":"Nome","emoji":"🍝","time":"30 min","servings":"4 persone","difficulty":"Facile","ingredients":["200g pasta"],"steps":["Cuoci la pasta"],"tip":"Consiglio"}]}\\n' +
-            'Sempre 3 ricette. Difficulty: Facile, Media, o Difficile.';
+        const SYSTEM_PROMPT = 'Sei Il Mio Chef. Rispondi SOLO con JSON valido, nessun testo extra, nessun markdown.\n' +
+            'Formato esatto:\n' +
+            '{"recipes":[{"name":"Nome","emoji":"🍝","time":"30 min","servings":"4 persone","difficulty":"Facile","ingredients":["200g pasta"],"steps":["Cuoci la pasta"],"tip":"Consiglio"}]}\n' +
+            'Genera il numero di ricette indicato nel messaggio. Difficulty: Facile, Media, o Difficile.';
 
         let currentTab = 'name';
+        let recipeCount = 3;
         let ingredientsList = [];
         
         let config = {
@@ -221,6 +240,8 @@
         }
 
         function editKey() {
+            const modelName = config.model === "anthropic" ? "Claude (Anthropic)" : "Gemini (Google)";
+            if (!confirm(`Vuoi davvero eliminare la chiave API per ${modelName}?`)) return;
             if (config.model === "anthropic") {
                 config.anthropicKey = "";
                 localStorage.removeItem("chef_anthropic_api_key");
@@ -263,14 +284,26 @@
             const wrapper = document.getElementById("tags-wrapper");
             const submitBtn = document.getElementById("search-ing-btn");
             if (!wrapper || !submitBtn) return;
-            
+
+            wrapper.innerHTML = "";
+
             if (ingredientsList.length === 0) {
-                wrapper.innerHTML = `<span style="color: var(--muted); font-style: italic; font-size: 14px; align-self: center;">Nessun ingrediente ancora…</span>`;
+                const placeholder = document.createElement("span");
+                placeholder.style.cssText = "color: var(--muted); font-style: italic; font-size: 14px; align-self: center;";
+                placeholder.textContent = "Nessun ingrediente ancora…";
+                wrapper.appendChild(placeholder);
                 submitBtn.disabled = true;
             } else {
-                wrapper.innerHTML = ingredientsList.map(t => `
-                    <div class="tag">${t}<span onclick="removeIngredientTag('${t}')">×</span></div>
-                `).join('');
+                ingredientsList.forEach(t => {
+                    const tag = document.createElement("div");
+                    tag.className = "tag";
+                    tag.textContent = t;
+                    const removeBtn = document.createElement("span");
+                    removeBtn.textContent = "×";
+                    removeBtn.addEventListener("click", () => removeIngredientTag(t));
+                    tag.appendChild(removeBtn);
+                    wrapper.appendChild(tag);
+                });
                 submitBtn.disabled = false;
             }
         }
@@ -306,8 +339,8 @@
             if (type === 'ing' && ingredientsList.length === 0) return;
 
             const prompt = type === 'name' 
-                ? `Dammi 3 ricette per: "${label}"` 
-                : `Ho questi ingredienti: ${ingredientsList.join(", ")}. Dammi 3 ricette creative.`;
+                ? `Dammi ${recipeCount} ricette per: "${label}"` 
+                : `Ho questi ingredienti: ${ingredientsList.join(", ")}. Dammi ${recipeCount} ricette creative.`;
 
             resetUI();
             document.getElementById("loading-view").style.display = "block";
@@ -336,11 +369,11 @@
                     "Content-Type": "application/json",
                     "x-api-key": config.anthropicKey,
                     "anthropic-version": "2023-06-01",
-                    "dangerouslyAllowBrowser": "true"
+                    "anthropic-dangerous-direct-browser-access": "true"
                 },
                 body: JSON.stringify({
-                    model: "claude-3-5-sonnet-20241022",
-                    max_tokens: 1500,
+                    model: "claude-sonnet-4-5",
+                    max_tokens: 4000,
                     system: SYSTEM_PROMPT,
                     messages: [{ role: "user", content: userQuery }]
                 })
