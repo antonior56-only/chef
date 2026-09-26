@@ -1,4 +1,4 @@
-const CACHE_NAME = "il-mio-chef-2026-09-26-v6";
+const CACHE_NAME = "il-mio-chef-2026-09-26-v7";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -19,3 +19,4 @@ self.addEventListener("fetch", (event) => {
   }).catch(() => caches.match(event.request).then((cached) => cached ||
     (event.request.mode === "navigate" ? caches.match("./index.html") : Response.error()))));
 });
+

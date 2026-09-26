@@ -555,7 +555,7 @@
             body.style.display = isOpen ? "none" : "block";
             arrow.innerText = isOpen ? "▼ apri" : "▲ chiudi";
         }
-        // Il pulsante appare solo quando il browser può installare la PWA (come in Cedolino PWA).
+        // Mostra il pulsante fuori dall’app installata; usa il prompt nativo quando disponibile.
         let installPrompt = null;
         const installButton = document.getElementById("install-btn");
         const installHelp = document.getElementById("install-help");
@@ -564,7 +564,7 @@
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
             (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
         function updateInstallButton() {
-            installButton.hidden = installedMode() || !window.isSecureContext || !(installPrompt || isIOS);
+            installButton.hidden = installedMode();
             if (installedMode()) installHelp.hidden = true;
         }
         window.addEventListener("beforeinstallprompt", (event) => {
@@ -586,8 +586,13 @@
                 await prompt.prompt();
                 await prompt.userChoice;
                 updateInstallButton();
-            } else if (isIOS) {
-                installHelp.textContent = "Su iPhone o iPad: apri Condividi nel browser e scegli ‘Aggiungi alla schermata Home’.";
+            } else {
+                const isEdge = /Edg\//.test(navigator.userAgent);
+                installHelp.textContent = isIOS
+                    ? "Su iPhone o iPad: apri Condividi e scegli ‘Aggiungi alla schermata Home’."
+                    : isEdge
+                        ? "In Edge: apri il menu ⋯, scegli App, poi ‘Installa questo sito come app’."
+                        : "In Chrome: apri il menu ⋮ e scegli ‘Installa pagina come app’ (può trovarsi sotto Trasmetti, salva e condividi).";
                 installHelp.hidden = false;
             }
         });
