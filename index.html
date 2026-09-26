@@ -23,6 +23,7 @@
         .api-panel input { width: 180px; }
         .api-panel button { padding: 6px 12px; background: var(--terra); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
         
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
         .install-btn { margin-top: 16px; padding: 11px 18px; border: 0; border-radius: 999px; background: var(--olive); color: white; font: 600 0.95rem Georgia, serif; cursor: pointer; box-shadow: 0 3px 12px rgba(61,43,31,.18); }
         .install-btn:hover { filter: brightness(1.08); }
         .install-btn[hidden] { display: none; }
@@ -67,6 +68,7 @@
     <div class="api-panel">
         <div id="api-status">Configura la tua IA preferita.</div>
         <div class="api-controls">
+            <label class="sr-only" for="model-select">Servizio IA</label>
             <select id="model-select" onchange="updateModelUI()">
                 <option value="gemini">Gemini (Google)</option>
             </select>
@@ -96,11 +98,12 @@
             <div style="font-size: 1.3rem; color: var(--brown); margin-bottom: 6px; font-weight: 700;">Cerca una ricetta</div>
             <div style="color: var(--muted); font-style: italic; margin-bottom: 20px; font-size: 0.9rem;">Scrivi il nome del piatto e premi Cerca</div>
             <div class="input-group">
+                <label class="sr-only" for="dish-input">Nome della ricetta</label>
                 <input type="text" id="dish-input" placeholder="es. Carbonara, Tiramisù..." class="main-input" autocomplete="off">
                 <button class="btn btn-terra" id="search-name-btn" onclick="handleSearch('name')">Cerca ✨</button>
             </div>
             <div style="display:flex; align-items:center; gap:10px; margin-top:14px; justify-content:flex-end;">
-                <label style="font-size:0.85rem; color:var(--muted);">Numero di ricette:</label>
+                <label for="recipe-count-select" style="font-size:0.85rem; color:var(--muted);">Numero di ricette:</label>
                 <select id="recipe-count-select" onchange="syncSelectors(this.value)" style="padding:5px 10px; border-radius:8px; border:1.5px solid var(--brown); background:var(--cream); color:var(--brown); font-size:0.9rem; cursor:pointer;">
                     <option value="3" selected>3</option>
                     <option value="5">5</option>
@@ -115,6 +118,7 @@
             <div style="font-size: 1.3rem; color: var(--brown); margin-bottom: 6px; font-weight: 700;">Cosa hai nel frigo?</div>
             <div style="color: var(--muted); font-style: italic; margin-bottom: 20px; font-size: 0.9rem;">Aggiungi gli ingredienti uno alla volta</div>
             <div class="input-group">
+                <label class="sr-only" for="ing-input">Ingrediente</label>
                 <input type="text" id="ing-input" placeholder="es. uova, pancetta..." class="main-input" autocomplete="off">
                 <button class="btn btn-olive" onclick="addIngredientTag()">+ Aggiungi</button>
             </div>
@@ -122,7 +126,7 @@
                 <span style="color: var(--muted); font-style: italic; font-size: 14px; align-self: center;">Nessun ingrediente ancora…</span>
             </div>
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; justify-content:flex-end;">
-                <label style="font-size:0.85rem; color:var(--muted);">Numero di ricette:</label>
+                <label for="recipe-count-select-ing" style="font-size:0.85rem; color:var(--muted);">Numero di ricette:</label>
                 <select id="recipe-count-select-ing" onchange="syncSelectors(this.value)" style="padding:5px 10px; border-radius:8px; border:1.5px solid var(--brown); background:var(--cream); color:var(--brown); font-size:0.9rem; cursor:pointer;">
                     <option value="3" selected>3</option>
                     <option value="5">5</option>
@@ -229,6 +233,7 @@
             } else {
                 statusEl.innerText = `Inserisci API Key per Gemini:`;
                 containerEl.innerHTML = `
+                    <label class="sr-only" for="api-key-input">Chiave API Gemini</label>
                     <input type="password" id="api-key-input" placeholder="Incolla chiave qui...">
                     <button onclick="saveCurrentKey()">Salva</button>
                     ${model === "gemini" ? '<a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:white; font-size:12px; text-decoration:underline;">Genera una API key Gemini</a>' : ""}
