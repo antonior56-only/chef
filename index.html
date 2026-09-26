@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#3D2B1F">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="icon" type="image/png" href="./icon-192.png">
     <link rel="apple-touch-icon" href="./icon-192.png">
     <meta name="description" content="Assistente culinario per trovare ricette con l’IA.">
-    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="manifest" href="./manifest.webmanifest?v=chef-id-2">
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
     <title>Il Mio Chef - Assistente Culinario Multi-IA</title>
     <style>
@@ -570,6 +571,7 @@
         window.addEventListener("beforeinstallprompt", (event) => {
             event.preventDefault();
             installPrompt = event;
+            installHelp.hidden = true;
             updateInstallButton();
         });
         window.addEventListener("appinstalled", () => {
@@ -592,7 +594,7 @@
                     ? "Su iPhone o iPad: apri Condividi e scegli ‘Aggiungi alla schermata Home’."
                     : isEdge
                         ? "In Edge: apri il menu ⋯, scegli App, poi ‘Installa questo sito come app’."
-                        : "In Chrome: apri il menu ⋮ e scegli ‘Installa pagina come app’ (può trovarsi sotto Trasmetti, salva e condividi).";
+                        : "Chrome abilita l’installazione dopo un clic e circa 30 secondi sulla pagina. Ricarica la pagina e premi di nuovo ‘Installa app’.";
                 installHelp.hidden = false;
             }
         });
