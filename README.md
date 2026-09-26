@@ -1,15 +1,7 @@
-# Il Mio Chef PWA
+Il Mio Chef PWA
 
-Apri `index.html` tramite un server locale o HTTPS. Il protocollo `file://` non supporta l’installazione PWA né il service worker.
+Carica questi file tutti nella stessa cartella pubblicata da GitHub Pages: index.html, manifest.webmanifest, service-worker.js, icon-192.png e icon-512.png. Sostituisci il vecchio index.html e manifest, poi attendi che GitHub Pages completi il deployment.
 
-## Avvio locale
+Il pulsante “Installa app” si mostra solo quando il browser segnala che la PWA è installabile; su iPhone e iPad mostra le istruzioni per aggiungerla alla schermata Home. Su Windows, se il pulsante non compare, apri il sito con Chrome o Edge aggiornato e verifica che non sia già installato.
 
-Con Python installato, apri un terminale in questa cartella e avvia:
-
-```bash
-python -m http.server 8000
-```
-
-Visita `http://localhost:8000`. Il pulsante **Scarica l’app** appare quando l’app non è già aperta in modalità installata. Su browser supportati avvia il prompt nativo; su iPhone/iPad mostra i passaggi per aggiungerla alla schermata Home.
-
-La pagina e le risorse locali vengono memorizzate nella cache. Le richieste ai servizi IA richiedono una connessione internet e una chiave API configurata nell’app.
+L’installazione e il service worker richiedono HTTPS o localhost. Dopo la prima apertura online, la pagina resta disponibile offline; le richieste IA richiedono comunque Internet e una chiave Gemini.
