@@ -68,7 +68,6 @@
         <div id="api-status">Configura la tua IA preferita.</div>
         <div class="api-controls">
             <select id="model-select" onchange="updateModelUI()">
-                <option value="anthropic">Claude (Anthropic)</option>
                 <option value="gemini">Gemini (Google)</option>
             </select>
             <div id="key-input-container">
@@ -184,15 +183,13 @@
         let ingredientsList = [];
         
         let config = {
-            model: "anthropic",
-            anthropicKey: "",
+            model: "gemini",
             geminiKey: ""
         };
 
         document.addEventListener('DOMContentLoaded', () => {
             try {
-                config.model = localStorage.getItem("chef_model") || "anthropic";
-                config.anthropicKey = localStorage.getItem("chef_anthropic_api_key") || "";
+                config.model = "gemini";
                 config.geminiKey = localStorage.getItem("chef_gemini_api_key") || "";
                 
                 const selectEl = document.getElementById("model-select");
@@ -218,22 +215,23 @@
             
             const model = selectEl.value;
             config.model = model;
-            localStorage.setItem("chef_model", model);
+            localStorage.setItem("chef_model", "gemini");
             
-            const key = model === "anthropic" ? config.anthropicKey : config.geminiKey;
+            const key = config.geminiKey;
             const statusEl = document.getElementById("api-status");
             const containerEl = document.getElementById("key-input-container");
 
             if (!statusEl || !containerEl) return;
 
             if (key) {
-                statusEl.innerText = `🔑 Chiave ${model.charAt(0).toUpperCase() + model.slice(1)} salvata.`;
+                statusEl.innerText = `🔑 Chiave Gemini salvata.`;
                 containerEl.innerHTML = `<button onclick="editKey()" style="background: rgba(255,255,255,0.2);">Modifica Chiave</button>`;
             } else {
-                statusEl.innerText = `Inserisci API Key per ${model === "anthropic" ? "Claude" : "Gemini"}:`;
+                statusEl.innerText = `Inserisci API Key per Gemini:`;
                 containerEl.innerHTML = `
                     <input type="password" id="api-key-input" placeholder="Incolla chiave qui...">
                     <button onclick="saveCurrentKey()">Salva</button>
+                    ${model === "gemini" ? '<a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:white; font-size:12px; text-decoration:underline;">Genera una API key Gemini</a>' : ""}
                 `;
             }
         }
@@ -245,26 +243,15 @@
             const key = inputEl.value.trim();
             if (!key) return;
             
-            if (config.model === "anthropic") {
-                config.anthropicKey = key;
-                localStorage.setItem("chef_anthropic_api_key", key);
-            } else {
-                config.geminiKey = key;
-                localStorage.setItem("chef_gemini_api_key", key);
-            }
+            config.geminiKey = key;
+            localStorage.setItem("chef_gemini_api_key", key);
             updateModelUI();
         }
 
         function editKey() {
-            const modelName = config.model === "anthropic" ? "Claude (Anthropic)" : "Gemini (Google)";
-            if (!confirm(`Vuoi davvero eliminare la chiave API per ${modelName}?`)) return;
-            if (config.model === "anthropic") {
-                config.anthropicKey = "";
-                localStorage.removeItem("chef_anthropic_api_key");
-            } else {
-                config.geminiKey = "";
-                localStorage.removeItem("chef_gemini_api_key");
-            }
+            if (!confirm("Vuoi davvero eliminare la chiave API Gemini?")) return;
+            config.geminiKey = "";
+            localStorage.removeItem("chef_gemini_api_key");
             updateModelUI();
         }
 
@@ -362,12 +349,7 @@
             document.getElementById("loading-view").style.display = "block";
             
             try {
-                let recipes = [];
-                if (config.model === "anthropic") {
-                    recipes = await callAnthropic(prompt);
-                } else {
-                    recipes = await callGemini(prompt);
-                }
+                const recipes = await callGemini(prompt);
                 renderRecipes(recipes, label);
             } catch (e) {
                 document.getElementById("error-text").innerText = e.message;
@@ -375,28 +357,6 @@
             } finally {
                 document.getElementById("loading-view").style.display = "none";
             }
-        }
-
-        async function callAnthropic(userQuery) {
-            if (!config.anthropicKey) throw new Error("Chiave Anthropic mancante.");
-            const res = await fetchWithBackoff("https://api.anthropic.com/v1/messages", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-api-key": config.anthropicKey,
-                    "anthropic-version": "2023-06-01",
-                    "anthropic-dangerous-direct-browser-access": "true"
-                },
-                body: JSON.stringify({
-                    model: "claude-sonnet-4-5",
-                    max_tokens: Math.min(500 + recipeCount * 350, 4000),
-                    system: SYSTEM_PROMPT,
-                    messages: [{ role: "user", content: userQuery }]
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error?.message || "Errore API Anthropic");
-            return parseResponse(data.content?.[0]?.text);
         }
 
         async function callGemini(userQuery) {
@@ -619,3 +579,7 @@
 </script>
 </body>
 </html>
+
+
+
+
